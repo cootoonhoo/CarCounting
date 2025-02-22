@@ -3,6 +3,8 @@ from collections import defaultdict
 import numpy as np
 import cv2
 
+SHOULD_ONLY_LOOK_FOR_CARS = True
+
 def getRandomColor(object_id):
     np.random.seed(object_id)
     randomColor = tuple(map(int, np.random.randint(50, 255, 3)))
@@ -20,7 +22,7 @@ class Detector:
     def processImage(self,frame):
         results = self.model(frame, conf=self.conf_threshold)
 
-        detections = self.traking_updater(results[0].boxes)
+        detections = self.update_imgTracking(results[0].boxes)
 
         for object_id, box, classe, conf in detections:
             x1, y1, x2, y2 = box
@@ -50,10 +52,15 @@ class Detector:
         
         return frame
     
-    def traking_updater(self, detections, max_dist=50):
+    def update_imgTracking(self, detections, max_dist=50):
         new_detections = []
         
         for box in detections:
+            # Checks if the detection class is a car (Id 2 in Yolo) 
+            # If it isn't, just skip for the next object
+            if int(box.cls)!= 2 and SHOULD_ONLY_LOOK_FOR_CARS: 
+                continue
+
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             actual_center = ((x1 + x2) // 2, (y1 + y2) // 2)
             classe = int(box.cls)

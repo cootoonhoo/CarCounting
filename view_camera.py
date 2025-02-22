@@ -4,9 +4,9 @@ import time
 import numpy as np
 from collections import defaultdict
 
-VIDEO_PATH = './Files/Videos/car passing by.mp4'
+# VIDEO_PATH = './Files/Videos/car passing by.mp4'
 # VIDEO_PATH = './Files/Videos/CarsPassingBy2.mp4'
-# VIDEO_PATH = './Files/Videos/CarsPassingBy3.mp4'
+VIDEO_PATH = './Files/Videos/CarsPassingBy3.mp4'
 CONFIABILITY_THRESHOLD = 0.45
 
 def reproduzir_video(video_Path):
