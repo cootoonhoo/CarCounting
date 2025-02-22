@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 from collections import defaultdict
+import torch
 import numpy as np
 import cv2
 
@@ -33,7 +34,7 @@ def checks_for_intersection_with_line(box, linha_p1, linha_p2):
     return False
 
 class Detector:
-    def __init__(self, model_path, conf_threshold, trail_length = 20):
+    def __init__(self, model_path, conf_threshold, run_on_gpu, trail_length = 20):
         self.model = YOLO(model_path)
         self.conf_threshold = conf_threshold
         self.colors = {}
@@ -42,7 +43,11 @@ class Detector:
         self.trail_length = trail_length
         self.counted_cars = set()
         self.counter = 0
-        self.model.to('cuda')
+
+        if(run_on_gpu):
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            print(f'Using device: {device}')
+            self.model = self.model.to(device)
 
     def processImage(self,frame, line):
         results = self.model(frame, conf=self.conf_threshold)
@@ -77,7 +82,7 @@ class Detector:
         
         return frame
     
-    def update_imgTracking(self, detections, line, max_dist=50):
+    def update_imgTracking(self, detections, line, max_dist=70):
         new_detections = []
         line_p1, line_p2 = line
 
@@ -126,6 +131,6 @@ class Detector:
         return new_detections
 
 def main():
-    model = YOLO('yolov8l.pt')
+    model = YOLO('yolo11m-obb.pt')
 if __name__=='__main__':
     main() 

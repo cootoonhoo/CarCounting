@@ -177,3 +177,5 @@ cython_debug/
 .pt
 Files/Models/yolov5l6u.pt
 yolov8l.pt
+Files/Models/yolov10b.pt
+Files/Models/yolo11m-obb.pt
