@@ -10,29 +10,24 @@ def getRandomColor(object_id):
     randomColor = tuple(map(int, np.random.randint(50, 255, 3)))
     return randomColor
 
-def verifica_intersecao_linha(box, linha_p1, linha_p2):
-    """Verifica se a box intercepta a linha"""
+def checks_for_intersection_with_line(box, linha_p1, linha_p2):
     x1, y1, x2, y2 = box
     
-    # Cria os 4 segmentos da box
     box_segmentos = [
-        ((x1, y1), (x2, y1)),  # Topo
-        ((x2, y1), (x2, y2)),  # Direita
-        ((x2, y2), (x1, y2)),  # Base
-        ((x1, y2), (x1, y1))   # Esquerda
+        ((x1, y1), (x2, y1)),
+        ((x2, y1), (x2, y2)),
+        ((x2, y2), (x1, y2)),
+        ((x1, y2), (x1, y1))
     ]
     
     def ccw(A, B, C):
-        """Verifica orientação de três pontos"""
         return (C[1] - A[1]) * (B[0] - A[0]) > (B[1] - A[1]) * (C[0] - A[0])
     
-    def intersecta(A, B, C, D):
-        """Verifica se os segmentos AB e CD se intersectam"""
+    def intersect(A, B, C, D):
         return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
     
-    # Verifica intersecção com cada segmento da box
     for seg in box_segmentos:
-        if intersecta(seg[0], seg[1], linha_p1, linha_p2):
+        if intersect(seg[0], seg[1], linha_p1, linha_p2):
             return True
             
     return False
@@ -47,6 +42,7 @@ class Detector:
         self.trail_length = trail_length
         self.counted_cars = set()
         self.counter = 0
+        self.model.to('cuda')
 
     def processImage(self,frame, line):
         results = self.model(frame, conf=self.conf_threshold)
@@ -116,7 +112,7 @@ class Detector:
 
             # Line intersection counter
             if closest_id not in self.counted_cars:
-                if verifica_intersecao_linha((x1, y1, x2, y2), line_p1, line_p2):
+                if checks_for_intersection_with_line((x1, y1, x2, y2), line_p1, line_p2):
                     self.counted_cars.add(closest_id)
                     self.colors[closest_id] = (0, 0, 0)  # Muda cor para preto
                     self.counter += 1
@@ -129,3 +125,7 @@ class Detector:
         
         return new_detections
 
+def main():
+    model = YOLO('yolov8l.pt')
+if __name__=='__main__':
+    main() 

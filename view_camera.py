@@ -4,26 +4,26 @@ import time
 
 #Scenario 1
 # VIDEO_PATH = './Files/Videos/car passing by.mp4'
-# CONFIABILITY_THRESHOLD = 0.45
-# LINE_P1 = 1200,410  #(x,y)
-# LINE_P2 = 420,400   #(x,y)
+# CONFIABILITY_THRESHOLD = 0.75
+# LINE_P1 = 1000,300  #(x,y)
+# LINE_P2 = 1000,1000   #(x,y)
 
 #Scenario 2
 # VIDEO_PATH = './Files/Videos/CarsPassingBy2.mp4'
-# CONFIABILITY_THRESHOLD = 0.45
-# LINE_P1 = 1200,410  #(x,y)
-# LINE_P2 = 420,400   #(x,y)
+# CONFIABILITY_THRESHOLD = 0.55
+# LINE_P1 = 100,700  #(x,y)
+# LINE_P2 = 1800,700   #(x,y)
 
 #Scenario 3
 VIDEO_PATH = './Files/Videos/CarsPassingBy3.mp4'
-CONFIABILITY_THRESHOLD = 0.45
+CONFIABILITY_THRESHOLD = 0.55
 LINE_P1 = 420,410   #(x,y)
 LINE_P2 = 1200,405  #(x,y)
 
 def play_video(video_Path):
     countLine = LINE_P1,LINE_P2
     cap = cv2.VideoCapture(video_Path)
-    detector = Detector('./Files/Models/yolov8n.pt', CONFIABILITY_THRESHOLD)
+    detector = Detector('./Files/Models/yolov8l.pt', CONFIABILITY_THRESHOLD)
 
     if not cap.isOpened():
         print(f"Fail! It was not possible to open this video {VIDEO_PATH}")
