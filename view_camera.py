@@ -1,15 +1,27 @@
 import cv2
 from detector import Detector
 import time
-import numpy as np
-from collections import defaultdict
 
+#Scenario 1
 # VIDEO_PATH = './Files/Videos/car passing by.mp4'
+# CONFIABILITY_THRESHOLD = 0.45
+# LINE_P1 = 1200,410  #(x,y)
+# LINE_P2 = 420,400   #(x,y)
+
+#Scenario 2
 # VIDEO_PATH = './Files/Videos/CarsPassingBy2.mp4'
+# CONFIABILITY_THRESHOLD = 0.45
+# LINE_P1 = 1200,410  #(x,y)
+# LINE_P2 = 420,400   #(x,y)
+
+#Scenario 3
 VIDEO_PATH = './Files/Videos/CarsPassingBy3.mp4'
 CONFIABILITY_THRESHOLD = 0.45
+LINE_P1 = 420,410   #(x,y)
+LINE_P2 = 1200,405  #(x,y)
 
-def reproduzir_video(video_Path):
+def play_video(video_Path):
+    countLine = LINE_P1,LINE_P2
     cap = cv2.VideoCapture(video_Path)
     detector = Detector('./Files/Models/yolov8n.pt', CONFIABILITY_THRESHOLD)
 
@@ -20,8 +32,6 @@ def reproduzir_video(video_Path):
     last_time = 0
     processing_fps = 0
 
-
-
     while cap.isOpened():
         ret, frame = cap.read()
         
@@ -29,14 +39,17 @@ def reproduzir_video(video_Path):
             print("Error: One frame was not able to read - Ending stream")
             break
 
+        cv2.line(frame, LINE_P1, LINE_P2, (255, 0, 0), 2)
+
         actual_time = time.time()
         if last_time != 0:
             processing_fps = 1 / (actual_time - last_time)
         last_time = actual_time
 
-        processedFrame = detector.processImage(frame)
+        processedFrame = detector.processImage(frame, countLine)
 
         cv2.putText(processedFrame, f'FPS: {processing_fps:.1f}', (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f'Total cars: {detector.counter}', (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow('Video', processedFrame)
 
         if cv2.waitKey(25) & 0xFF == ord('q'): # Press Q to exit
@@ -46,7 +59,7 @@ def reproduzir_video(video_Path):
     cv2.destroyAllWindows()   
 
 def main():
-    reproduzir_video(VIDEO_PATH)
+    play_video(VIDEO_PATH)
 
 if __name__=='__main__':
     main()
