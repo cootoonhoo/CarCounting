@@ -1,27 +1,24 @@
 import cv2
-from ultralytics import YOLO
+from detector import Detector
 import time
 import numpy as np
 from collections import defaultdict
 
-# VIDEO_PATH = './Files/car passing by.mp4'
-# VIDEO_PATH = './Files/CarsPassingBy2.mp4'
-VIDEO_PATH = './Files/CarsPassingBy3.mp4'
-
+VIDEO_PATH = './Files/Videos/car passing by.mp4'
+# VIDEO_PATH = './Files/Videos/CarsPassingBy2.mp4'
+# VIDEO_PATH = './Files/Videos/CarsPassingBy3.mp4'
+CONFIABILITY_THRESHOLD = 0.45
 
 def reproduzir_video(video_Path):
     cap = cv2.VideoCapture(video_Path)
-    modelo = YOLO('yolov8n.pt')
-
-
+    detector = Detector('./Files/Models/yolov8n.pt', CONFIABILITY_THRESHOLD)
 
     if not cap.isOpened():
-        print("Erro ao abrir o vídeo")
+        print(f"Fail! It was not possible to open this video {VIDEO_PATH}")
         return
     
-    fps_original = cap.get(cv2.CAP_PROP_FPS)
-    tempo_anterior = 0
-    fps_processamento = 0
+    last_time = 0
+    processing_fps = 0
 
 
 
@@ -29,41 +26,26 @@ def reproduzir_video(video_Path):
         ret, frame = cap.read()
         
         if not ret:
-            print("Erro na leitura do video")
+            print("Error: One frame was not able to read - Ending stream")
             break
 
-        tempo_atual = time.time()
-        if tempo_anterior != 0:
-            fps_processamento = 1 / (tempo_atual - tempo_anterior)
-        tempo_anterior = tempo_atual
+        actual_time = time.time()
+        if last_time != 0:
+            processing_fps = 1 / (actual_time - last_time)
+        last_time = actual_time
 
-        resultados = modelo(frame, conf=0.25) 
+        processedFrame = detector.processImage(frame)
 
-        frame_anotado = resultados[0].plot()
+        cv2.putText(processedFrame, f'FPS: {processing_fps:.1f}', (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.imshow('Video', processedFrame)
 
-        cv2.putText(frame_anotado, f'FPS: {fps_processamento:.1f}', 
-                    (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        
-        for r in resultados:
-            for box in r.boxes:
-                classe = modelo.names[int(box.cls)]
-                conf = float(box.conf)
-                print(f'Detectado: {classe} (Confiança: {conf:.2f})')
-        
-        cv2.imshow('Video', frame_anotado)
-        
-        if cv2.waitKey(25) & 0xFF == ord('q'):
+        if cv2.waitKey(25) & 0xFF == ord('q'): # Press Q to exit
             break
     
     cap.release()
-    cv2.destroyAllWindows()
-
-# Exemplo de uso
-    # Substitua 'seu_video.mp4' pelo caminho do seu vídeo
-    
+    cv2.destroyAllWindows()   
 
 def main():
-
     reproduzir_video(VIDEO_PATH)
 
 if __name__=='__main__':
